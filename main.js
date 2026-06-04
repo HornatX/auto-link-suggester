@@ -125,24 +125,32 @@ var AutoLinkSuggest = class extends import_obsidian.EditorSuggest {
     if (lastOpen > lastClose) return null;
     const match = linePrefix.match(/([^ \s,.;?!\/()\[\]{}"'<>|*:]+)$/);
     if (!match) return null;
-    const rawQuery = match[1];
-    if (!rawQuery.trim()) return null;
-    const query = rawQuery.toLowerCase();
-    const isAscii = /^[\x00-\x7F]+$/.test(query);
-    if (isAscii && query.length < 2) return null;
-    const isFuzzy = this.plugin.settings.fuzzyMatch;
-    let hasMatch = false;
-    if (isFuzzy) {
-      hasMatch = this.plugin.cachedFiles.some((f) => f.lowerBase.includes(query));
-    } else {
-      hasMatch = this.plugin.cachedFiles.some((f) => f.lowerBase.startsWith(query));
+    let block = match[1];
+    if (!block.trim()) return null;
+    const MAX_LOOKBACK = 30;
+    if (block.length > MAX_LOOKBACK) {
+      block = block.substring(block.length - MAX_LOOKBACK);
     }
-    if (hasMatch) {
-      return {
-        start: { line: cursor.line, ch: cursor.ch - rawQuery.length },
-        end: cursor,
-        query
-      };
+    const isFuzzy = this.plugin.settings.fuzzyMatch;
+    for (let i = 0; i < block.length; i++) {
+      const rawQuery = block.substring(i);
+      const query = rawQuery.toLowerCase();
+      const isAscii = /^[\x00-\x7F]+$/.test(query);
+      if (isAscii && query.length < 2) continue;
+      let hasMatch = false;
+      if (isFuzzy) {
+        hasMatch = this.plugin.cachedFiles.some((f) => f.lowerBase.includes(query));
+      } else {
+        hasMatch = this.plugin.cachedFiles.some((f) => f.lowerBase.startsWith(query));
+      }
+      if (hasMatch) {
+        return {
+          // start 的位置精确定位到匹配词的开头，替换时不会把前面的 "30年前" 误删掉
+          start: { line: cursor.line, ch: cursor.ch - rawQuery.length },
+          end: cursor,
+          query
+        };
+      }
     }
     return null;
   }
