@@ -170,35 +170,49 @@ class AutoLinkSuggest extends EditorSuggest<CachedFile> {
         const lastClose = linePrefix.lastIndexOf(']]');
         if (lastOpen > lastClose) return null;
 
-        // 【精准词汇提取】：从最后一个空格或常见标点符号开始提取用户当前正在打的字
+        // 【精准词汇提取】：从最后一个空格或常见标点符号开始提取用户当前正在打的字序列
         const match = linePrefix.match(/([^ \s,.;?!\/()\[\]{}"'<>|*:]+)$/);
         if (!match) return null;
         
-        const rawQuery = match[1];
-        if (!rawQuery.trim()) return null;
+        let block = match[1];
+        if (!block.trim()) return null;
 
-        const query = rawQuery.toLowerCase(); // 转一次小写即可
-        
-        // 英文最少输入 2 个字母触发，中文等其他语言 1 个字即可
-        const isAscii = /^[\x00-\x7F]+$/.test(query);
-        if (isAscii && query.length < 2) return null;
-
-        const isFuzzy = this.plugin.settings.fuzzyMatch;
-        let hasMatch = false;
-
-        // 性能优化：将 isFuzzy 逻辑提起到循环外部，避免几千次无效的分支判断
-        if (isFuzzy) {
-            hasMatch = this.plugin.cachedFiles.some(f => f.lowerBase.includes(query));
-        } else {
-            hasMatch = this.plugin.cachedFiles.some(f => f.lowerBase.startsWith(query));
+        // 🚀 性能优化：限制最大向前追溯的字符数（假设最长需要匹配的文件名不超过 30 个字符）
+        // 避免在长篇没有标点的中文段落中进行巨量无效计算导致卡顿
+        const MAX_LOOKBACK = 30;
+        if (block.length > MAX_LOOKBACK) {
+            block = block.substring(block.length - MAX_LOOKBACK);
         }
 
-        if (hasMatch) {
-            return {
-                start: { line: cursor.line, ch: cursor.ch - rawQuery.length },
-                end: cursor,
-                query: query
-            };
+        const isFuzzy = this.plugin.settings.fuzzyMatch;
+
+        // 🎯 核心修复：倒序递减匹配（解决中文连续输入没有空格分隔的问题）
+        // 例如用户输入 "30年前张"，block="30年前张"
+        // 循环会依次判断："30年前张" -> "0年前张" -> "年前张" -> "前张" -> "张"
+        for (let i = 0; i < block.length; i++) {
+            const rawQuery = block.substring(i);
+            const query = rawQuery.toLowerCase();
+
+            // 英文最少输入 2 个字母触发，中文等其他语言 1 个字即可
+            const isAscii = /^[\x00-\x7F]+$/.test(query);
+            if (isAscii && query.length < 2) continue; // 如果当前截取的是单个英文字母，跳过找下一个
+
+            let hasMatch = false;
+            if (isFuzzy) {
+                hasMatch = this.plugin.cachedFiles.some(f => f.lowerBase.includes(query));
+            } else {
+                hasMatch = this.plugin.cachedFiles.some(f => f.lowerBase.startsWith(query));
+            }
+
+            // 💡 一旦找到匹配（因为是从长到短找的，所以找到的一定是最长匹配）
+            if (hasMatch) {
+                return {
+                    // start 的位置精确定位到匹配词的开头，替换时不会把前面的 "30年前" 误删掉
+                    start: { line: cursor.line, ch: cursor.ch - rawQuery.length },
+                    end: cursor,
+                    query: query
+                };
+            }
         }
 
         return null;
