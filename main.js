@@ -25,7 +25,9 @@ module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
 var DEFAULT_SETTINGS = {
   targetFolders: "",
-  fuzzyMatch: false
+  fuzzyMatch: false,
+  preventClickNavigation: false
+  // 新增：默认关闭
 };
 var AutoLinkPlugin = class extends import_obsidian.Plugin {
   constructor() {
@@ -45,31 +47,36 @@ var AutoLinkPlugin = class extends import_obsidian.Plugin {
     await this.loadSettings();
     this.addSettingTab(new AutoLinkSettingTab(this.app, this));
     this.registerEditorSuggest(new AutoLinkSuggest(this.app, this));
-    this.app.workspace.onLayoutReady(() => {
-      this.updateCache();
-    });
-    const handleFileChange = (file, oldPath) => {
-      if (file instanceof import_obsidian.TFile && file.extension === "md") {
-        const folders = this.getNormalizedFolders();
-        const isNewPathInTarget = folders.some(
-          (folder) => file.path.startsWith(folder + "/") || file.parent?.path === folder
-        );
-        let isOldPathInTarget = false;
-        if (oldPath) {
-          const lastSlash = oldPath.lastIndexOf("/");
-          const oldParent = lastSlash === -1 ? "/" : oldPath.substring(0, lastSlash);
-          isOldPathInTarget = folders.some(
-            (folder) => oldPath.startsWith(folder + "/") || oldParent === folder
-          );
-        }
-        if (isNewPathInTarget || isOldPathInTarget) {
-          this.debouncedUpdateCache();
+    this.app.workspace.onLayoutReady(() => this.updateCache());
+    const stopNavigation = (evt) => {
+      if (!this.settings.preventClickNavigation) return;
+      const target = evt.target;
+      const linkElement = target.closest(".internal-link, .cm-hmd-internal-link, .cm-link");
+      if (!linkElement) return;
+      let href = linkElement.getAttribute("data-href");
+      if (!href) {
+        href = linkElement.textContent || "";
+      }
+      href = href.replace(/^\[\[|\]\]$/g, "").split("|")[0].split("#")[0].trim();
+      if (!href) return;
+      const isTargetLink = this.cachedFiles.some(
+        (f) => f.file.basename === href || f.file.name === href || f.file.path === href
+      );
+      if (isTargetLink) {
+        evt.preventDefault();
+        evt.stopPropagation();
+        evt.stopImmediatePropagation();
+        const view = this.app.workspace.getActiveViewOfType(import_obsidian.MarkdownView);
+        if (view && view.getMode() === "preview") {
+          const state = view.getState();
+          state.mode = "source";
+          view.setState(state, { history: false });
         }
       }
     };
-    this.registerEvent(this.app.vault.on("create", (file) => handleFileChange(file)));
-    this.registerEvent(this.app.vault.on("delete", (file) => handleFileChange(file)));
-    this.registerEvent(this.app.vault.on("rename", (file, oldPath) => handleFileChange(file, oldPath)));
+    this.registerDomEvent(window, "click", stopNavigation, { capture: true });
+    this.registerDomEvent(window, "auxclick", stopNavigation, { capture: true });
+    this.registerDomEvent(window, "touchend", stopNavigation, { capture: true });
   }
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -198,6 +205,12 @@ var AutoLinkSettingTab = class extends import_obsidian.PluginSettingTab {
     new import_obsidian.Setting(containerEl).setName("\u6A21\u7CCA\u5339\u914D (Fuzzy Match)").setDesc('\u5F00\u542F\u540E\uFF0C\u53EA\u9700\u8F93\u5165\u6587\u4EF6\u540D\u4E2D\u5305\u542B\u7684\u4EFB\u610F\u5B57\u5373\u53EF\u89E6\u53D1\u8865\u9F50\uFF08\u5982\uFF1A\u8F93\u5165"\u548C"\u6216"\u4F60"\u80FD\u5339\u914D"\u6211\u548C\u4F60"\uFF09\u3002\u5173\u95ED\u65F6\uFF0C\u4EC5\u652F\u6301\u6309\u987A\u5E8F\u524D\u7F00\u5339\u914D\u3002').addToggle(
       (toggle) => toggle.setValue(this.plugin.settings.fuzzyMatch).onChange(async (value) => {
         this.plugin.settings.fuzzyMatch = value;
+        this.plugin.debouncedSaveSettings();
+      })
+    );
+    new import_obsidian.Setting(containerEl).setName("\u9632\u8BEF\u89E6\uFF1A\u70B9\u51FB\u6307\u5B9A\u53CC\u94FE\u4E0D\u8DF3\u8F6C").setDesc("\u5F00\u542F\u540E\uFF0C\u5728\u9605\u8BFB\u6A21\u5F0F\u6216\u5B9E\u65F6\u9884\u89C8\u6A21\u5F0F\u4E0B\uFF0C\u70B9\u51FB\u6307\u5411\u300C\u6307\u5B9A\u6587\u4EF6\u5939\u300D\u4E2D\u6587\u4EF6\u7684\u53CC\u94FE\uFF0C\u5C06\u4E0D\u518D\u89E6\u53D1\u9875\u9762\u8DF3\u8F6C\uFF0C\u800C\u662F\u76F4\u63A5\u5C06\u5149\u6807\u5B9A\u4F4D\u5728\u4E0A\u9762\u8FDB\u884C\u6587\u672C\u7F16\u8F91\u3002").addToggle(
+      (toggle) => toggle.setValue(this.plugin.settings.preventClickNavigation).onChange(async (value) => {
+        this.plugin.settings.preventClickNavigation = value;
         this.plugin.debouncedSaveSettings();
       })
     );

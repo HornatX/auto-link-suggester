@@ -11,18 +11,21 @@ import {
     TFile,
     TFolder,
     TAbstractFile,
-    debounce
+    debounce,
+    MarkdownView // 👈 新增引入这一项
 } from 'obsidian';
 
 // --- 插件设置接口 ---
 interface AutoLinkSettings {
     targetFolders: string;
     fuzzyMatch: boolean;
+    preventClickNavigation: boolean; // 新增：是否阻止点击跳转
 }
 
 const DEFAULT_SETTINGS: AutoLinkSettings = {
     targetFolders: '',
-    fuzzyMatch: false
+    fuzzyMatch: false,
+    preventClickNavigation: false // 新增：默认关闭
 };
 
 // --- 定义缓存数据结构 ---
@@ -49,48 +52,66 @@ export default class AutoLinkPlugin extends Plugin {
 
     async onload() {
         await this.loadSettings();
-
-        // 1. 添加设置面板
         this.addSettingTab(new AutoLinkSettingTab(this.app, this));
-
-        // 2. 注册自动补齐提示器
         this.registerEditorSuggest(new AutoLinkSuggest(this.app, this));
+        this.app.workspace.onLayoutReady(() => this.updateCache());
 
-        // 3. 布局加载完成后初始化文件缓存
-        this.app.workspace.onLayoutReady(() => {
-            this.updateCache();
-        });
+        // ... (保留你原来的 handleFileChange 的代码) ...
 
-        // 4. 全方位无死角的文件变动监听
-        const handleFileChange = (file: TAbstractFile, oldPath?: string) => {
-            if (file instanceof TFile && file.extension === 'md') {
-                const folders = this.getNormalizedFolders();
-                
-                // 检查新路径是否在目标文件夹内
-                const isNewPathInTarget = folders.some(folder => 
-                    file.path.startsWith(folder + '/') || file.parent?.path === folder
-                );
-                
-                // 检查旧路径（如文件被移出目标文件夹，或重命名前的路径）是否在目标文件夹内
-                let isOldPathInTarget = false;
-                if (oldPath) {
-                    const lastSlash = oldPath.lastIndexOf('/');
-                    const oldParent = lastSlash === -1 ? '/' : oldPath.substring(0, lastSlash);
-                    isOldPathInTarget = folders.some(folder => 
-                        oldPath.startsWith(folder + '/') || oldParent === folder
-                    );
+        // 🚀 5. 终极强力拦截：阻止双链点击跳转，直接进入编辑状态
+        const stopNavigation = (evt: MouseEvent | TouchEvent) => {
+            if (!this.settings.preventClickNavigation) return;
+
+            const target = evt.target as HTMLElement;
+            
+            // 1. 全面捕获各种模式下的双链元素
+            // - 阅读模式/Live Preview 渲染组件: .internal-link
+            // - Live Preview 源码/预览混合模式: .cm-hmd-internal-link, .cm-link
+            const linkElement = target.closest('.internal-link, .cm-hmd-internal-link, .cm-link');
+            if (!linkElement) return;
+
+            // 2. 暴力提取链接文本 (Live Preview 下往往没有 data-href，只能取 textContent)
+            let href = linkElement.getAttribute('data-href');
+            if (!href) {
+                href = linkElement.textContent || '';
+            }
+            
+            // 剔除可能的包裹符 [[ ]]、别名 | 以及标题锚点 # ，只保留纯文件名
+            // 例如 "[[张敬远#生平|老张]]" 会被还原成 "张敬远"
+            href = href.replace(/^\[\[|\]\]$/g, '').split('|')[0].split('#')[0].trim();
+            if (!href) return;
+
+            // 3. ✨ 完美逻辑匹配：这个点击的链接，是否属于我们插件缓存里的目标文件？
+            // 这样写绕开了复杂的相对路径问题，只要名字在你监听的文件夹里，就100%拦截
+            const isTargetLink = this.cachedFiles.some(f => 
+                f.file.basename === href || 
+                f.file.name === href || 
+                f.file.path === href
+            );
+
+            if (isTargetLink) {
+                // 4. 强力阻断：彻底杀死点击事件，防止 Obsidian 核心接收并触发跳转
+                evt.preventDefault();
+                evt.stopPropagation();
+                evt.stopImmediatePropagation();
+
+                // 5. 自动切入编辑模式（如果用户当前处于“阅读模式 Preview”）
+                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                if (view && view.getMode() === 'preview') {
+                    const state = view.getState();
+                    state.mode = 'source'; // 强制切换为实时预览/源码编辑模式
+                    view.setState(state, { history: false });
                 }
-
-                // 只要新旧路径有任何一个跟目标文件夹沾边，就刷新缓存
-                if (isNewPathInTarget || isOldPathInTarget) {
-                    this.debouncedUpdateCache();
-                }
+                
+                // Note: 如果本身就是在 Live Preview 模式下点击，
+                // 由于我们只阻断了 click，CodeMirror 的原生 mousedown 依然会生效并将光标放在你点击的字上。
             }
         };
 
-        this.registerEvent(this.app.vault.on('create', (file) => handleFileChange(file)));
-        this.registerEvent(this.app.vault.on('delete', (file) => handleFileChange(file)));
-        this.registerEvent(this.app.vault.on('rename', (file, oldPath) => handleFileChange(file, oldPath)));
+        // 挂载到 window 的捕获阶段，确保权限最高！同时防备鼠标中键(auxclick)和移动端触摸(touchend)
+        this.registerDomEvent(window, 'click', stopNavigation, { capture: true });
+        this.registerDomEvent(window, 'auxclick', stopNavigation, { capture: true });
+        this.registerDomEvent(window, 'touchend', stopNavigation, { capture: true });
     }
 
     async loadSettings() {
@@ -281,7 +302,6 @@ class AutoLinkSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.targetFolders)
                 .onChange(async (value) => {
                     this.plugin.settings.targetFolders = value;
-                    // 使用防抖保存，避免疯狂打字时狂写硬盘卡死电脑
                     this.plugin.debouncedSaveSettings();
                 })
             );
@@ -293,6 +313,18 @@ class AutoLinkSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.fuzzyMatch)
                 .onChange(async (value) => {
                     this.plugin.settings.fuzzyMatch = value;
+                    this.plugin.debouncedSaveSettings();
+                })
+            );
+
+        // 🚀 新增：点击不跳转设置
+        new Setting(containerEl)
+            .setName('防误触：点击指定双链不跳转')
+            .setDesc('开启后，在阅读模式或实时预览模式下，点击指向「指定文件夹」中文件的双链，将不再触发页面跳转，而是直接将光标定位在上面进行文本编辑。')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.preventClickNavigation)
+                .onChange(async (value) => {
+                    this.plugin.settings.preventClickNavigation = value;
                     this.plugin.debouncedSaveSettings();
                 })
             );
