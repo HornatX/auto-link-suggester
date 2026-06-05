@@ -27,7 +27,6 @@ var DEFAULT_SETTINGS = {
   targetFolders: "",
   fuzzyMatch: false,
   preventClickNavigation: false
-  // 新增：默认关闭
 };
 var AutoLinkPlugin = class extends import_obsidian.Plugin {
   constructor() {
@@ -37,10 +36,13 @@ var AutoLinkPlugin = class extends import_obsidian.Plugin {
     this.debouncedUpdateCache = (0, import_obsidian.debounce)(() => {
       this.updateCache();
     }, 1e3, true);
-    // 防抖：用户在设置里面打字时，停顿 750ms 后再悄悄保存和扫描硬盘
-    this.debouncedSaveSettings = (0, import_obsidian.debounce)(async () => {
-      await this.saveData(this.settings);
-      this.updateCache();
+    // 修复 Warning 2: 使用 .then() 和 .catch() 处理 Promise，而不是裸奔的 async/await
+    this.debouncedSaveSettings = (0, import_obsidian.debounce)(() => {
+      this.saveData(this.settings).then(() => {
+        this.updateCache();
+      }).catch((e) => {
+        console.error("AutoLink Plugin: Failed to save settings", e);
+      });
     }, 750, true);
   }
   async onload() {
@@ -79,13 +81,14 @@ var AutoLinkPlugin = class extends import_obsidian.Plugin {
     this.registerDomEvent(window, "touchend", stopNavigation, { capture: true });
   }
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const data = await this.loadData();
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
   }
-  // 格式化目标文件夹列表（抹平反斜杠、清理首尾空格、去掉末尾多余斜杠）
+  // 格式化目标文件夹列表
   getNormalizedFolders() {
     return this.settings.targetFolders.split("\n").map((f) => f.trim().replace(/\\/g, "/").replace(/\/+$/, "")).filter((f) => f.length > 0);
   }
-  // 更新文件缓存（核心性能优化点：仅扫描指定文件夹 + Map哈希去重）
+  // 更新文件缓存
   updateCache() {
     const folders = this.getNormalizedFolders();
     if (folders.length === 0) {
@@ -121,7 +124,6 @@ var AutoLinkSuggest = class extends import_obsidian.EditorSuggest {
     super(app);
     this.plugin = plugin;
   }
-  // 触发条件判断（防打扰、防长句误触发机制）
   onTrigger(cursor, editor, file) {
     if (this.plugin.cachedFiles.length === 0) return null;
     const line = editor.getLine(cursor.line);
@@ -130,7 +132,7 @@ var AutoLinkSuggest = class extends import_obsidian.EditorSuggest {
     const lastOpen = linePrefix.lastIndexOf("[[");
     const lastClose = linePrefix.lastIndexOf("]]");
     if (lastOpen > lastClose) return null;
-    const match = linePrefix.match(/([^ \s,.;?!\/()\[\]{}"'<>|*:]+)$/);
+    const match = linePrefix.match(/([^ \s,.;?!/()[\]{}"'<>|*:]+)$/);
     if (!match) return null;
     let block = match[1];
     if (!block.trim()) return null;
@@ -142,7 +144,7 @@ var AutoLinkSuggest = class extends import_obsidian.EditorSuggest {
     for (let i = 0; i < block.length; i++) {
       const rawQuery = block.substring(i);
       const query = rawQuery.toLowerCase();
-      const isAscii = /^[\x00-\x7F]+$/.test(query);
+      const isAscii = /^[\x20-\x7E]+$/.test(query);
       if (isAscii && query.length < 2) continue;
       let hasMatch = false;
       if (isFuzzy) {
@@ -152,7 +154,6 @@ var AutoLinkSuggest = class extends import_obsidian.EditorSuggest {
       }
       if (hasMatch) {
         return {
-          // start 的位置精确定位到匹配词的开头，替换时不会把前面的 "30年前" 误删掉
           start: { line: cursor.line, ch: cursor.ch - rawQuery.length },
           end: cursor,
           query
@@ -161,19 +162,16 @@ var AutoLinkSuggest = class extends import_obsidian.EditorSuggest {
     }
     return null;
   }
-  // 获取并过滤建议列表
   getSuggestions(context) {
     const query = context.query;
     const isFuzzy = this.plugin.settings.fuzzyMatch;
     const results = isFuzzy ? this.plugin.cachedFiles.filter((f) => f.lowerBase.includes(query)) : this.plugin.cachedFiles.filter((f) => f.lowerBase.startsWith(query));
     return results.slice(0, 10);
   }
-  // 渲染建议下拉列表的 UI
   renderSuggestion(cachedItem, el) {
     el.createEl("div", { text: cachedItem.file.basename });
     el.createEl("small", { text: cachedItem.file.path, cls: "suggestion-note" });
   }
-  // 用户选择下拉项后的替换行为
   selectSuggestion(cachedItem, evt) {
     if (this.context) {
       const editor = this.context.editor;
@@ -195,21 +193,21 @@ var AutoLinkSettingTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Auto Link \u81EA\u52A8\u8865\u5168\u53CC\u94FE \u8BBE\u7F6E" });
+    new import_obsidian.Setting(containerEl).setName("Auto Link \u81EA\u52A8\u8865\u5168\u53CC\u94FE \u8BBE\u7F6E").setHeading();
     new import_obsidian.Setting(containerEl).setName("\u6307\u5B9A\u6587\u4EF6\u5939 (Target Folders)").setDesc("\u8F93\u5165\u9700\u8981\u88AB\u76D1\u542C\u548C\u81EA\u52A8\u8865\u9F50\u53CC\u94FE\u7684\u6587\u4EF6\u5939\u8DEF\u5F84\u3002\u591A\u4E2A\u6587\u4EF6\u5939\u8BF7\u7528\u56DE\u8F66\uFF08\u6362\u884C\uFF09\u533A\u5206\u3002\u4F8B\u5982\uFF1ANotes/Person").addTextArea(
-      (text) => text.setPlaceholder("folder1\nfolder2/subfolder").setValue(this.plugin.settings.targetFolders).onChange(async (value) => {
+      (text) => text.setPlaceholder("folder1\nfolder2/subfolder").setValue(this.plugin.settings.targetFolders).onChange((value) => {
         this.plugin.settings.targetFolders = value;
         this.plugin.debouncedSaveSettings();
       })
     );
     new import_obsidian.Setting(containerEl).setName("\u6A21\u7CCA\u5339\u914D (Fuzzy Match)").setDesc('\u5F00\u542F\u540E\uFF0C\u53EA\u9700\u8F93\u5165\u6587\u4EF6\u540D\u4E2D\u5305\u542B\u7684\u4EFB\u610F\u5B57\u5373\u53EF\u89E6\u53D1\u8865\u9F50\uFF08\u5982\uFF1A\u8F93\u5165"\u548C"\u6216"\u4F60"\u80FD\u5339\u914D"\u6211\u548C\u4F60"\uFF09\u3002\u5173\u95ED\u65F6\uFF0C\u4EC5\u652F\u6301\u6309\u987A\u5E8F\u524D\u7F00\u5339\u914D\u3002').addToggle(
-      (toggle) => toggle.setValue(this.plugin.settings.fuzzyMatch).onChange(async (value) => {
+      (toggle) => toggle.setValue(this.plugin.settings.fuzzyMatch).onChange((value) => {
         this.plugin.settings.fuzzyMatch = value;
         this.plugin.debouncedSaveSettings();
       })
     );
     new import_obsidian.Setting(containerEl).setName("\u9632\u8BEF\u89E6\uFF1A\u70B9\u51FB\u6307\u5B9A\u53CC\u94FE\u4E0D\u8DF3\u8F6C").setDesc("\u5F00\u542F\u540E\uFF0C\u5728\u9605\u8BFB\u6A21\u5F0F\u6216\u5B9E\u65F6\u9884\u89C8\u6A21\u5F0F\u4E0B\uFF0C\u70B9\u51FB\u6307\u5411\u300C\u6307\u5B9A\u6587\u4EF6\u5939\u300D\u4E2D\u6587\u4EF6\u7684\u53CC\u94FE\uFF0C\u5C06\u4E0D\u518D\u89E6\u53D1\u9875\u9762\u8DF3\u8F6C\uFF0C\u800C\u662F\u76F4\u63A5\u5C06\u5149\u6807\u5B9A\u4F4D\u5728\u4E0A\u9762\u8FDB\u884C\u6587\u672C\u7F16\u8F91\u3002").addToggle(
-      (toggle) => toggle.setValue(this.plugin.settings.preventClickNavigation).onChange(async (value) => {
+      (toggle) => toggle.setValue(this.plugin.settings.preventClickNavigation).onChange((value) => {
         this.plugin.settings.preventClickNavigation = value;
         this.plugin.debouncedSaveSettings();
       })
