@@ -297,7 +297,7 @@ class AutoLinkSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('防误触：点击指定双链不跳转')
-            .setDesc('开启后，在阅读模式或实时预览模式下，点击指向「指定文件夹」中文件的双链，将不再触发页面跳转，而是直接将光标定位在上面进行文本编辑。')
+            .setDesc('开启后，在阅读模式或实时预览模式下，点击指向「指定文件夹」中文件的双链，将不再触发页面跳转。')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.preventClickNavigation)
                 .onChange((value) => { // 修复 Warning 2: 移除了没必要的 async 标记
