@@ -10,6 +10,10 @@ Treat your Obsidian Vault as a smart link database. Provides intelligent autocom
 
 ## ✦ Examples 快速示例
 
+<p align="center">
+  <img src="assets/双连接演示.gif" alt="双连接演示" />
+</p>
+
 **示例 1：输入笔记名称自动补全双链**
 
 在编辑器中输入"日"，自动弹出补全建议：
