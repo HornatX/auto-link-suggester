@@ -4,7 +4,7 @@
 
 If you find this plugin helpful, feel free to follow me on Xiaohongshu (RED) where I share more tips, tutorials, and updates.
 
-https://www.xiaohongshu.com/user/profile/6353523d000000001802f8ae?xsec_token=YB4vLkLfzOijtg8c1Vh12ZASaI1ByqPPYi82ZzKbG72qE=&xsec_source=app_share&xhsshare=QQ&appuid=6353523d000000001802f8ae&apptime=1780631605&share_id=3846902afcd94e2ab78467cd7b9b5669
+<a href="https://www.xiaohongshu.com/user/profile/6353523d000000001802f8ae?xsec_token=YB4vLkLfzOijtg8c1Vh12ZASaI1ByqPPYi82ZzKbG72qE=&xsec_source=app_share&xhsshare=QQ&appuid=6353523d000000001802f8ae&apptime=1780631605&share_id=3846902afcd94e2ab78467cd7b9b5669" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #ff2442; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; transition: background-color 0.3s;">📱 关注小红书</a>
 
 💡 **温馨提示 / Notice:**
 本插件是一款专为 Obsidian **中文汉字**深度输入体验设计的“智能双链补全助手”。它通过指定文件夹扫描、智能防抖缓存、中英文差异化触发以及多匹配模式，在保障库运行流畅的前提下，为您提供更符合直觉的本地笔记关联体验。
