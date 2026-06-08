@@ -50,6 +50,21 @@ var AutoLinkPlugin = class extends import_obsidian.Plugin {
     this.addSettingTab(new AutoLinkSettingTab(this.app, this));
     this.registerEditorSuggest(new AutoLinkSuggest(this.app, this));
     this.app.workspace.onLayoutReady(() => this.updateCache());
+    this.registerEvent(this.app.vault.on("create", (file) => {
+      if (file instanceof import_obsidian.TFile && file.extension === "md") {
+        this.debouncedUpdateCache();
+      }
+    }));
+    this.registerEvent(this.app.vault.on("delete", (file) => {
+      if (file instanceof import_obsidian.TFile && file.extension === "md") {
+        this.debouncedUpdateCache();
+      }
+    }));
+    this.registerEvent(this.app.vault.on("rename", (file) => {
+      if (file instanceof import_obsidian.TFile && file.extension === "md") {
+        this.debouncedUpdateCache();
+      }
+    }));
     const stopNavigation = (evt) => {
       if (!this.settings.preventClickNavigation) return;
       const target = evt.target;
@@ -206,7 +221,7 @@ var AutoLinkSettingTab = class extends import_obsidian.PluginSettingTab {
         this.plugin.debouncedSaveSettings();
       })
     );
-    new import_obsidian.Setting(containerEl).setName("\u9632\u8BEF\u89E6\uFF1A\u70B9\u51FB\u6307\u5B9A\u53CC\u94FE\u4E0D\u8DF3\u8F6C").setDesc("\u5F00\u542F\u540E\uFF0C\u5728\u9605\u8BFB\u6A21\u5F0F\u6216\u5B9E\u65F6\u9884\u89C8\u6A21\u5F0F\u4E0B\uFF0C\u70B9\u51FB\u6307\u5411\u300C\u6307\u5B9A\u6587\u4EF6\u5939\u300D\u4E2D\u6587\u4EF6\u7684\u53CC\u94FE\uFF0C\u5C06\u4E0D\u518D\u89E6\u53D1\u9875\u9762\u8DF3\u8F6C\uFF0C\u800C\u662F\u76F4\u63A5\u5C06\u5149\u6807\u5B9A\u4F4D\u5728\u4E0A\u9762\u8FDB\u884C\u6587\u672C\u7F16\u8F91\u3002").addToggle(
+    new import_obsidian.Setting(containerEl).setName("\u9632\u8BEF\u89E6\uFF1A\u70B9\u51FB\u6307\u5B9A\u53CC\u94FE\u4E0D\u8DF3\u8F6C").setDesc("\u5F00\u542F\u540E\uFF0C\u5728\u9605\u8BFB\u6A21\u5F0F\u6216\u5B9E\u65F6\u9884\u89C8\u6A21\u5F0F\u4E0B\uFF0C\u70B9\u51FB\u6307\u5411\u300C\u6307\u5B9A\u6587\u4EF6\u5939\u300D\u4E2D\u6587\u4EF6\u7684\u53CC\u94FE\uFF0C\u5C06\u4E0D\u518D\u89E6\u53D1\u9875\u9762\u8DF3\u8F6C\u3002").addToggle(
       (toggle) => toggle.setValue(this.plugin.settings.preventClickNavigation).onChange((value) => {
         this.plugin.settings.preventClickNavigation = value;
         this.plugin.debouncedSaveSettings();

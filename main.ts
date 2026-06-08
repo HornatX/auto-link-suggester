@@ -60,6 +60,23 @@ export default class AutoLinkPlugin extends Plugin {
         this.registerEditorSuggest(new AutoLinkSuggest(this.app, this));
         this.app.workspace.onLayoutReady(() => this.updateCache());
 
+        // 监听文件变动，自动刷新缓存
+        this.registerEvent(this.app.vault.on('create', (file) => {
+            if (file instanceof TFile && file.extension === 'md') {
+                this.debouncedUpdateCache();
+            }
+        }));
+        this.registerEvent(this.app.vault.on('delete', (file) => {
+            if (file instanceof TFile && file.extension === 'md') {
+                this.debouncedUpdateCache();
+            }
+        }));
+        this.registerEvent(this.app.vault.on('rename', (file) => {
+            if (file instanceof TFile && file.extension === 'md') {
+                this.debouncedUpdateCache();
+            }
+        }));
+
         // 🚀 5. 终极强力拦截：阻止双链点击跳转，直接进入编辑状态
         const stopNavigation = (evt: MouseEvent | TouchEvent) => {
             if (!this.settings.preventClickNavigation) return;
