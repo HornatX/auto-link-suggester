@@ -91,6 +91,21 @@
 
 ***
 
+### 赞赏支持
+
+<details>
+<summary>🎁 如果觉得有用，请作者喝杯咖啡</summary>
+
+<br>
+
+<p align="center">
+  <img src="assets/赞赏码.JPG" width="250" />
+</p>
+
+</details>
+
+***
+
 QQ 交流群：1094620986
 
 ---
