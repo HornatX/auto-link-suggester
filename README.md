@@ -2,6 +2,11 @@
 
 <a href="https://www.xiaohongshu.com/user/profile/6353523d000000001802f8ae?xsec_token=YB4vLkLfzOijtg8c1Vh12ZASaI1ByqPPYi82ZzKbG72qE=&xsec_source=app_share&xhsshare=QQ&appuid=6353523d000000001802f8ae&apptime=1780631605&share_id=3846902afcd94e2ab78467cd7b9b5669" target="_blank"><img src="https://img.shields.io/badge/✦_关注小红书-ff2442?style=for-the-badge&logo=xiaohongshu&logoColor=white" alt="关注小红书" height="40"></a>
 我在小红书发布了许多obsidian的教程和插件开发进度，你的关注就是对我最大的支持
+
+[English](#english)
+
+## 简体中文说明
+
 ## ✦ Examples 快速示例
 
 <p align="center">
@@ -101,11 +106,9 @@ QQ 交流群：1094620986
 
 ---
 
-# ✦ Auto Link Suggester ✦
+## English
 
-**Smart Double-Link Autocompletion** — Designed for deep Chinese input experience in Obsidian
-
-## ✦ Examples
+[简体中文说明](#简体中文说明)
 
 <p align="center">
   <img src="assets/双连接演示.gif" alt="Demo" />
