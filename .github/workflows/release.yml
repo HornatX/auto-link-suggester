@@ -4,61 +4,58 @@ on:
   push:
     branches:
       - main
-      - master # 兼容各种主分支命名
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 安全的写入权限声明
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 
 
-      # 【变强壮】明确指定 Node.js 版本，避免服务器环境差异导致报错
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20' 
 
-      # 获取版本号
+      # 获取版本号 (1.0.5)
       - name: Get version from manifest.json
         id: get_version
         run: |
           VERSION=$(node -p "require('./manifest.json').version")
           echo "pkg_version=$VERSION" >> $GITHUB_OUTPUT
 
-      # 检查是否已存在 Release
+      # 【修改点 1】检查 Tag 时去掉 v。直接检查 1.0.5
       - name: Check if Release exists
         id: check_release
         run: |
           VERSION=${{ steps.get_version.outputs.pkg_version }}
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "版本 v$VERSION 已存在，跳过。"
+            echo "版本 $VERSION 已存在，跳过。"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      # 安装依赖 (无视本地版本冲突)
       - name: Install Dependencies
         if: steps.check_release.outputs.exists == 'false'
         run: npm install --legacy-peer-deps
 
-      # 【核心修复】编译代码，但用 --ignore-scripts 忽略掉你本地的 Z盘 PowerShell 脚本
       - name: Build plugin
         if: steps.check_release.outputs.exists == 'false'
         run: npm run build --ignore-scripts
 
-      # 自动打包上传
+      # 【修改点 2 & 3】创建 Release 时去掉 tag_name 和 name 前面的 v
       - name: Create Release
         if: steps.check_release.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.get_version.outputs.pkg_version }}
-          name: v${{ steps.get_version.outputs.pkg_version }}
+          tag_name: ${{ steps.get_version.outputs.pkg_version }} # 去掉了 v
+          name: ${{ steps.get_version.outputs.pkg_version }}     # 去掉了 v
           files: |
             main.js
             manifest.json

@@ -1,7 +1,7 @@
 {
   "id": "auto-link-suggester",
   "name": "Auto Link Suggester",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minAppVersion": "0.15.0",
   "description": "Automatically suggests internal link completions when you type a filename from a specified folder in the editor, with support for exact prefix and fuzzy matching.",
   "author": "hornat",
