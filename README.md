@@ -7,7 +7,7 @@
   <img src="assets/双连接演示.gif" alt="双连接演示" />
 </p>
 
-[简体中文说明](#简体中文说明) | [English](#english)
+[简体中文说明](#简体中文说明) | [用法](#用法) | [English](#english) | [Usage](#usage)
 
 ---
 
@@ -81,26 +81,12 @@
 
 ***
 
-### 使用指南
+## 用法
 
-#### 数据存储机制
+在设置界面的指定文件夹里，输入文件夹名称，多个用回车换行。
+被输入的文件夹下的文件，当你输入对应文字的时候，就会提示补齐双连接了。
 
-所有的用户偏好设置（包括目标文件夹路径、匹配模式开关等）均保存在 Obsidian 插件默认的本地 `data.json` 配置文件中。插件不需要且绝不请求任何网络权限，保障您的本地笔记数据隐私。
-
-#### 安装方法
-
-1. 下载编译好的 `main.js`, `manifest.json` 和 `styles.css` 文件。
-2. 打开您的 Obsidian 库所在的本地文件夹，进入 `.obsidian/plugins/` 目录。
-3. 创建一个名为 `auto-link-plugin` 的新文件夹。
-4. 将上述三个文件放入该文件夹中。
-5. 在 Obsidian 设置 > 社区插件 中刷新并启用该插件。
-
-#### 配置步骤
-
-1. **配置目标目录**：前往 Obsidian 设置 > `Auto Link 自动补全双链 设置`。
-2. **输入文件夹路径**：在文本框中输入您想要检索的文件夹路径。支持配置多个路径（一行一个，例如：`Notes` 或 `Work/Projects`）。
-3. **切换匹配模式**：根据检索习惯，决定是否开启 `模糊匹配 (Fuzzy Match)` 开关。
-4. **日常输入体验**：配置完成后，只要在编辑区中输入目标目录内笔记名称的部分字词，下拉框就会快速呈现对应的补全建议。
+<!-- 用法内容待补充 -->
 
 ***
 
@@ -110,7 +96,7 @@ QQ 交流群：1094620986
 
 ## English
 
-[简体中文说明](#简体中文说明)
+[简体中文说明](#简体中文说明) | [用法](#用法) | [Usage](#usage)
 
 **Smart Double-Link Autocompletion** — Designed for deep Chinese input experience in Obsidian
 
@@ -182,24 +168,10 @@ When enabled, clicking a double-link pointing to files in your target folders wi
 
 ***
 
-### Usage
+## Usage
 
-#### Data Storage
+<!-- TODO: Add usage content after Chinese version is finalized -->
 
-All settings (target folder paths, match mode, etc.) are saved locally in the plugin's standard `data.json` file. The plugin requires no network permissions and runs entirely offline.
+***
 
-#### Installation
-
-1. Download `main.js`, `manifest.json`, and `styles.css` from the latest release.
-2. Open your Obsidian vault directory and navigate to `.obsidian/plugins/`.
-3. Create a new folder named `auto-link-plugin`.
-4. Place the three files into the folder.
-5. Go to Settings > Community Plugins, reload, and enable the plugin.
-
-#### Getting Started
-
-1. **Set target folders**: Go to Settings > `Auto Link Settings`.
-2. **Enter folder paths**: Type the folder paths you want to index (one per line, e.g., `Notes` or `Work/Projects`).
-3. **Toggle matching mode**: Enable `Fuzzy Match` if needed.
-4. **Start typing**: Type any part of a note name from your target folders, and the suggestion dropdown will appear.
-
+QQ Group：1094620986
