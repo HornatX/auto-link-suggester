@@ -7,11 +7,11 @@
   <img src="assets/双连接演示.gif" alt="双连接演示" />
 </p>
 
-[简体中文说明](#简体中文说明) | [用法](#用法) | [English](#english) | [Usage](#usage)
+[简体中文](#简体中文) | [用法](#用法) | [English](#english) | [Usage](#usage)
 
 ---
 
-## 简体中文说明
+## 简体中文
 
 ### Examples 快速示例
 
