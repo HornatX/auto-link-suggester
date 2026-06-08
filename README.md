@@ -3,15 +3,17 @@
 <a href="https://www.xiaohongshu.com/user/profile/6353523d000000001802f8ae?xsec_token=YB4vLkLfzOijtg8c1Vh12ZASaI1ByqPPYi82ZzKbG72qE=&xsec_source=app_share&xhsshare=QQ&appuid=6353523d000000001802f8ae&apptime=1780631605&share_id=3846902afcd94e2ab78467cd7b9b5669" target="_blank"><img src="https://img.shields.io/badge/✦_关注小红书-ff2442?style=for-the-badge&logo=xiaohongshu&logoColor=white" alt="关注小红书" height="40"></a>
 我在小红书发布了许多obsidian的教程和插件开发进度，你的关注就是对我最大的支持
 
-[English](#english)
-
-## 简体中文说明
-
-## ✦ Examples 快速示例
-
 <p align="center">
   <img src="assets/双连接演示.gif" alt="双连接演示" />
 </p>
+
+[简体中文说明](#简体中文说明) | [English](#english)
+
+---
+
+## 简体中文说明
+
+### Examples 快速示例
 
 **1、输入笔记名称自动补全双链**
 
@@ -49,43 +51,43 @@
 
 ***
 
-## ✦ 核心功能
+### 核心功能
 
-### 1. 指定文件夹扫描 (Folder-Targeted Indexing)
+#### 1. 指定文件夹扫描 (Folder-Targeted Indexing)
 
 - **按需建立索引**：无需对整个知识库进行全局扫描，您可以自由指定一个或多个高频使用的核心文件夹（如日常随笔、人名库、项目列表等）。
 - **自动去重与合并**：即使指定的文件夹存在包含关系，内部的 Map 数据结构也能自动去重，确保缓存占用与检索效率处于理想状态。
 
-### 2. 智能触发与防打扰机制 (Smart Trigger Rules)
+#### 2. 智能触发与防打扰机制 (Smart Trigger Rules)
 
 - **精准词汇提取**：插件会根据光标前的最后一个空格或标点符号自动切分，提取您当前输入的关键字，避免无谓的弹窗干扰。
 - **双链状态识别**：当检测到光标已经处于已有的双链中（如 `[[...]]`），补全器将自动静默，防止二次干扰。
-- **中英文差异化触发**：输入中文、日文等非 ASCII 字符时支持单字触发；输入英文等 ASCII 字符时，自动过滤单字母输入，需达到 2 个字符才触发，平衡输入流畅度。
+- **中英文差异化触发**：输入中文、日文等非 ASCII 字符时支持单字符触发；输入英文等 ASCII 字符时，自动过滤单字母输入，需达到 2 个字符才触发，平衡输入流畅度。
 
-### 3. 多匹配模式切换 (Fuzzy & Prefix Matching)
+#### 3. 多匹配模式切换 (Fuzzy & Prefix Matching)
 
 - **前缀模式 (Prefix)**：默认仅检索以输入字词开头的笔记名称，适合结构清晰的规范化命名。
 - **模糊模式 (Fuzzy)**：开启后支持任意位置的包含匹配（例如输入"流"即可关联到"文件限流"、"信息流"），帮您快速发现笔记间的隐性关联。
 
-### 4. 无缝原生双链生成 (Official Path Resolution)
+#### 4. 无缝原生双链生成 (Official Path Resolution)
 
 - **遵循用户偏好**：调用 Obsidian 官方的 `generateMarkdownLink` 接口，生成的链接格式（如：相对路径、绝对路径、最短路径）将完全契合您在 Obsidian 软件中配置的全局首选项。
 - **内联图示过滤**：自动识别并剔除可能因 API 默认生成的内嵌叹号（`!`），保障双链的纯净呈现。
 
-### 5. 守护 CPU 的性能设计 (Performance-Oriented Architecture)
+#### 5. 守护 CPU 的性能设计 (Performance-Oriented Architecture)
 
 - **多重防抖机制**：无论是文件系统层面的"新建、重命名、删除"变动，还是您在后台输入文件夹配置的间歇，插件均内置了防抖控制器（Debounce）。合并多余计算，避免对硬盘和 CPU 造成高频读写压力。
 - **列表限流展现**：补全建议框单次至多渲染 10 条结果，降低频繁键入时的 UI 渲染开销。
 
 ***
 
-## ✦ Usage 使用指南
+### 使用指南
 
-### 数据存储机制
+#### 数据存储机制
 
 所有的用户偏好设置（包括目标文件夹路径、匹配模式开关等）均保存在 Obsidian 插件默认的本地 `data.json` 配置文件中。插件不需要且绝不请求任何网络权限，保障您的本地笔记数据隐私。
 
-### 安装方法
+#### 安装方法
 
 1. 下载编译好的 `main.js`, `manifest.json` 和 `styles.css` 文件。
 2. 打开您的 Obsidian 库所在的本地文件夹，进入 `.obsidian/plugins/` 目录。
@@ -93,7 +95,7 @@
 4. 将上述三个文件放入该文件夹中。
 5. 在 Obsidian 设置 > 社区插件 中刷新并启用该插件。
 
-### 配置步骤
+#### 配置步骤
 
 1. **配置目标目录**：前往 Obsidian 设置 > `Auto Link 自动补全双链 设置`。
 2. **输入文件夹路径**：在文本框中输入您想要检索的文件夹路径。支持配置多个路径（一行一个，例如：`Notes` 或 `Work/Projects`）。
@@ -110,9 +112,9 @@ QQ 交流群：1094620986
 
 [简体中文说明](#简体中文说明)
 
-<p align="center">
-  <img src="assets/双连接演示.gif" alt="Demo" />
-</p>
+**Smart Double-Link Autocompletion** — Designed for deep Chinese input experience in Obsidian
+
+### Examples
 
 **1. Type a note name to auto-complete double-links**
 
@@ -150,43 +152,43 @@ When enabled, clicking a double-link pointing to files in your target folders wi
 
 ***
 
-## ✦ Features
+### Features
 
-### 1. Folder-Targeted Indexing
+#### 1. Folder-Targeted Indexing
 
 - **Selective Indexing**: No need to scan the entire vault. Freely specify one or more high-frequency folders (e.g., daily notes, contacts, projects).
 - **Smart Deduplication**: Even with overlapping folder paths, the internal Map structure auto-duplicates, keeping cache and retrieval optimal.
 
-### 2. Smart Trigger & Anti-Disturb Logic
+#### 2. Smart Trigger & Anti-Disturb Logic
 
 - **Context-Aware Extraction**: Automatically splits input based on the last space or punctuation before the cursor, extracting the current keyword without intrusive popups.
 - **Bracket Detection**: When the cursor is already inside an existing `[[...]]` link, the suggester stays silent.
 - **CJK/ASCII Differentiation**: Triggers on a single CJK character; requires at least 2 characters for ASCII input to balance fluency.
 
-### 3. Fuzzy & Prefix Matching
+#### 3. Fuzzy & Prefix Matching
 
 - **Prefix Mode**: Default mode — only matches note names starting with your input. Ideal for structured naming conventions.
 - **Fuzzy Mode**: Matches any note name containing your input as a substring (e.g., typing "流" matches "文件限流", "信息流").
 
-### 4. Native Link Resolution
+#### 4. Native Link Resolution
 
 - **Respects User Preferences**: Uses Obsidian's official `generateMarkdownLink` API, so generated links follow your configured path format (relative, shortest, absolute).
 - **Embed Cleaning**: Automatically strips leading `!` characters from generated links.
 
-### 5. Performance-Oriented Architecture
+#### 5. Performance-Oriented Architecture
 
 - **Double-Layer Debouncing**: Debounce controls on file system events (`create`/`delete`/`rename`) and settings saves, merging redundant operations.
 - **Limited UI Render**: The suggestion dropdown renders at most 10 items, reducing DOM overhead.
 
 ***
 
-## ✦ Usage
+### Usage
 
-### Data Storage
+#### Data Storage
 
 All settings (target folder paths, match mode, etc.) are saved locally in the plugin's standard `data.json` file. The plugin requires no network permissions and runs entirely offline.
 
-### Installation
+#### Installation
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the latest release.
 2. Open your Obsidian vault directory and navigate to `.obsidian/plugins/`.
@@ -194,13 +196,10 @@ All settings (target folder paths, match mode, etc.) are saved locally in the pl
 4. Place the three files into the folder.
 5. Go to Settings > Community Plugins, reload, and enable the plugin.
 
-### Getting Started
+#### Getting Started
 
 1. **Set target folders**: Go to Settings > `Auto Link Settings`.
 2. **Enter folder paths**: Type the folder paths you want to index (one per line, e.g., `Notes` or `Work/Projects`).
 3. **Toggle matching mode**: Enable `Fuzzy Match` if needed.
 4. **Start typing**: Type any part of a note name from your target folders, and the suggestion dropdown will appear.
 
-***
-
-QQ Group：1094620986
