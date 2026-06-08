@@ -98,3 +98,106 @@
 ***
 
 QQ 交流群：1094620986
+
+---
+
+# ✦ Auto Link Suggester ✦
+
+**Smart Double-Link Autocompletion** — Designed for deep Chinese input experience in Obsidian
+
+## ✦ Examples
+
+<p align="center">
+  <img src="assets/双连接演示.gif" alt="Demo" />
+</p>
+
+**1. Type a note name to auto-complete double-links**
+
+Type "日" in the editor and get instant suggestions:
+
+```
+日记本
+日常随笔
+日记 - 2024
+```
+
+Select one to auto-generate `[[]]` link syntax.
+
+**2. Fuzzy matching discovers hidden connections**
+
+With fuzzy matching enabled, typing "流" matches:
+
+```
+文件限流
+信息流
+工作流程
+```
+
+**3. Click Navigation Guard**
+
+When enabled, clicking a double-link pointing to files in your target folders will no longer trigger page navigation, preventing accidental jumps.
+
+**4. Smart CJK/ASCII Trigger**
+
+| Input | Behavior |
+|-------|----------|
+| `日` | ✅ Triggers immediately (single CJK character) |
+| `a` | ❌ Not triggered (ASCII requires ≥2 characters) |
+| `ab` | ✅ Triggers autocompletion |
+
+***
+
+## ✦ Features
+
+### 1. Folder-Targeted Indexing
+
+- **Selective Indexing**: No need to scan the entire vault. Freely specify one or more high-frequency folders (e.g., daily notes, contacts, projects).
+- **Smart Deduplication**: Even with overlapping folder paths, the internal Map structure auto-duplicates, keeping cache and retrieval optimal.
+
+### 2. Smart Trigger & Anti-Disturb Logic
+
+- **Context-Aware Extraction**: Automatically splits input based on the last space or punctuation before the cursor, extracting the current keyword without intrusive popups.
+- **Bracket Detection**: When the cursor is already inside an existing `[[...]]` link, the suggester stays silent.
+- **CJK/ASCII Differentiation**: Triggers on a single CJK character; requires at least 2 characters for ASCII input to balance fluency.
+
+### 3. Fuzzy & Prefix Matching
+
+- **Prefix Mode**: Default mode — only matches note names starting with your input. Ideal for structured naming conventions.
+- **Fuzzy Mode**: Matches any note name containing your input as a substring (e.g., typing "流" matches "文件限流", "信息流").
+
+### 4. Native Link Resolution
+
+- **Respects User Preferences**: Uses Obsidian's official `generateMarkdownLink` API, so generated links follow your configured path format (relative, shortest, absolute).
+- **Embed Cleaning**: Automatically strips leading `!` characters from generated links.
+
+### 5. Performance-Oriented Architecture
+
+- **Double-Layer Debouncing**: Debounce controls on file system events (`create`/`delete`/`rename`) and settings saves, merging redundant operations.
+- **Limited UI Render**: The suggestion dropdown renders at most 10 items, reducing DOM overhead.
+
+***
+
+## ✦ Usage
+
+### Data Storage
+
+All settings (target folder paths, match mode, etc.) are saved locally in the plugin's standard `data.json` file. The plugin requires no network permissions and runs entirely offline.
+
+### Installation
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest release.
+2. Open your Obsidian vault directory and navigate to `.obsidian/plugins/`.
+3. Create a new folder named `auto-link-plugin`.
+4. Place the three files into the folder.
+5. Go to Settings > Community Plugins, reload, and enable the plugin.
+
+### Getting Started
+
+1. **Set target folders**: Go to Settings > `Auto Link Settings`.
+2. **Enter folder paths**: Type the folder paths you want to index (one per line, e.g., `Notes` or `Work/Projects`).
+3. **Toggle matching mode**: Enable `Fuzzy Match` if needed.
+4. **Start typing**: Type any part of a note name from your target folders, and the suggestion dropdown will appear.
+
+***
+
+QQ Group：1094620986
