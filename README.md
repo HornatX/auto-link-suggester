@@ -83,10 +83,10 @@
 
 ## 用法
 
-在设置界面的指定文件夹里，输入文件夹名称，多个用回车换行。
-被输入的文件夹下的文件，当你输入对应文字的时候，就会提示补齐双连接了。
-
-<!-- 用法内容待补充 -->
+1. 打开 Obsidian 设置，进入 **Auto Link 自动补全双链 设置**。
+2. 在「指定文件夹」文本框中，输入您希望启用自动补齐的文件夹路径（如 `Notes`、`Work/Projects`）。多个路径请用回车换行分隔。
+3. 在编辑区中输入该文件夹下笔记名称的部分字词，即可看到双链补全建议，选择后自动生成 `[[]]` 双链语法。
+4. 可选：开启「模糊匹配」支持任意位置的包含匹配；开启「防误触」阻止点击双链时跳转。
 
 ***
 
@@ -170,7 +170,10 @@ When enabled, clicking a double-link pointing to files in your target folders wi
 
 ## Usage
 
-<!-- TODO: Add usage content after Chinese version is finalized -->
+1. Open Obsidian Settings and navigate to **Auto Link Settings**.
+2. In the "Target Folders" text box, enter the folder paths you want to enable autocompletion for (e.g., `Notes`, `Work/Projects`). Separate multiple paths with new lines.
+3. While editing, type any part of a note name from those folders — a double-link suggestion will appear. Select it to auto-generate `[[]]` link syntax.
+4. Optional: Enable "Fuzzy Match" for substring matching anywhere in the name; enable "Click Guard" to prevent navigation when clicking double-links.
 
 ***
 
